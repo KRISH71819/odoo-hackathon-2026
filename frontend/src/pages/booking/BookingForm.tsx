@@ -277,7 +277,7 @@ export default function BookingForm({
               style={{ width: '100%' }}
               format="h:00 A"
               showNow={false}
-              minuteStep={60}
+              minuteStep={30}
               disabledTime={() => ({
                 disabledHours: () => {
                   const h: number[] = [];
@@ -310,7 +310,7 @@ export default function BookingForm({
               style={{ width: '100%' }}
               format="h:00 A"
               showNow={false}
-              minuteStep={60}
+              minuteStep={30}
               disabledTime={() => ({
                 disabledHours: () => {
                   const h: number[] = [];
