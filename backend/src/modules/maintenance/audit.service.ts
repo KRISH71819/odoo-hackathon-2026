@@ -1,4 +1,5 @@
 import prisma from '../../config/db';
+import { AssetStatus } from '@prisma/client';
 import type { CreateAuditInput, UpdateAuditItemInput } from './audit.validators';
 
 function createHttpError(message: string, statusCode: number) {
@@ -184,7 +185,7 @@ export async function generateReport(auditId: string) {
     prisma.audit.update({ where: { id: auditId }, data: { status: 'COMPLETED', completedDate: new Date() } }),
     // P0: Auto-update all unverified assets to LOST status
     ...unverifiedItems.map((item) =>
-      prisma.asset.update({ where: { id: item.asset.id }, data: { status: 'LOST' } })
+      prisma.asset.update({ where: { id: item.asset.id }, data: { status: AssetStatus.LOST } })
     ),
     prisma.notification.create({
       data: {

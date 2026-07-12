@@ -164,7 +164,20 @@ export default function AuditPage() {
           <p>Schedule the audit, verify each asset against its expected location and condition, then generate the discrepancy report.</p>
         </Modal>
         <Modal title="Audit report" open={Boolean(report)} onCancel={() => setReport(undefined)} footer={<Button onClick={() => setReport(undefined)}>Close</Button>}>
-          {report && <Space direction="vertical"><Text><strong>{report.totalAssetsAudited}</strong> assets audited</Text><Text><strong>{report.verifiedCount}</strong> verified ({report.verificationPercentage}%)</Text><Text><strong>{report.discrepancyCount}</strong> discrepancies found</Text>{report.discrepantAssets.map((asset) => <Text key={asset.auditItemId}>• {asset.asset.tag} — {asset.discrepancyNote || 'Details require review'}</Text>)}</Space>}
+          {report && <Space direction="vertical" style={{ width: '100%' }}>
+            <Text><strong>{report.totalAssetsAudited}</strong> assets audited</Text>
+            <Text><strong>{report.verifiedCount}</strong> verified ({report.verificationPercentage}%)</Text>
+            <Text><strong>{report.discrepancyCount}</strong> discrepancies found</Text>
+            {report.autoMarkedLostCount > 0 && (
+              <Alert
+                type="error"
+                showIcon
+                message={`${report.autoMarkedLostCount} asset${report.autoMarkedLostCount === 1 ? '' : 's'} auto-marked as LOST (unverified after audit close)`}
+                description={report.lostAssets.map(a => a.asset.tag).join(', ')}
+              />
+            )}
+            {report.discrepantAssets.map((asset) => <Text key={asset.auditItemId}>• {asset.asset.tag} — {asset.discrepancyNote || 'Details require review'}</Text>)}
+          </Space>}
         </Modal>
       </div>
     );

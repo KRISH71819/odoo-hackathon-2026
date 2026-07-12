@@ -154,7 +154,7 @@ export async function allocateAsset(
         allocationType: 'ALLOCATE',
         status: 'PENDING',
         reason: reason || undefined,
-        expectedReturnDate: expectedReturnDate || undefined,
+        expectedReturnDate: expectedReturnDate ?? undefined,
       },
       include: {
         allocatedTo: { select: { id: true, name: true, email: true } },

@@ -141,6 +141,7 @@ export interface AuditReport {
   verifiedCount: number;
   verificationPercentage: number;
   discrepancyCount: number;
+  autoMarkedLostCount: number;
   discrepantAssets: Array<{
     auditItemId: string;
     asset: { id: string; tag: string; name: string };
@@ -149,6 +150,10 @@ export interface AuditReport {
     expectedCondition?: string | null;
     actualCondition?: string | null;
     discrepancyNote?: string | null;
+  }>;
+  lostAssets: Array<{
+    auditItemId: string;
+    asset: { id: string; tag: string; name: string };
   }>;
 }
 
