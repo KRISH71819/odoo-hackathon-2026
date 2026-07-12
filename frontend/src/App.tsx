@@ -1,4 +1,5 @@
 import React from 'react';
+import logo from './assets/logo.png';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { ConfigProvider, App as AntApp } from 'antd';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -54,9 +55,7 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
         justifyContent: 'center',
         background: 'var(--bg-deepest)',
       }}>
-        <div className="sidebar-brand-icon" style={{ width: 56, height: 56, fontSize: 22, animation: 'pulse 2s ease-in-out infinite' }}>
-          AF
-        </div>
+        <img src={logo} alt="AssetFlow" style={{ width: 56, height: 56, borderRadius: 12, objectFit: 'cover', animation: 'pulse 2s ease-in-out infinite' }} />
       </div>
     );
   }

@@ -3,7 +3,11 @@ import prisma from '../../config/db';
 // ── Departments ────────────────────────────────────────────
 export async function listDepartments() {
   return prisma.department.findMany({
-    include: { _count: { select: { users: true } }, parent: { select: { id: true, name: true } } },
+    include: {
+      _count: { select: { users: true } },
+      parent: { select: { id: true, name: true } },
+      children: { select: { id: true, name: true } },
+    },
     orderBy: { name: 'asc' },
   });
 }

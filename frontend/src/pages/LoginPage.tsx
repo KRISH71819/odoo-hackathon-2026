@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import logo from '../assets/logo.png';
 import { Form, Input, Button, Typography, Divider, Space } from 'antd';
 import { MailOutlined, LockOutlined, UserOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
@@ -33,7 +34,7 @@ export default function LoginPage() {
     <div className="login-container">
       <div className="login-card">
         {/* Brand */}
-        <div className="login-logo">AF</div>
+        <img src={logo} alt="AssetFlow" style={{ width: 48, height: 48, borderRadius: 12, objectFit: 'cover', marginBottom: 24 }} />
         <Title level={3} className="login-title" style={{ fontFamily: 'var(--font-display)' }}>
           {isSignup ? 'Create Account' : 'Welcome Back'}
         </Title>
