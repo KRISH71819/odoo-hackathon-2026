@@ -1,4 +1,6 @@
 import prisma from '../../config/db';
+import { z } from 'zod';
+import { createAssetSchema, updateAssetSchema } from './asset.validators';
 
 // ── List Assets (paginated, filtered) ────────────────────────
 export async function listAssets(filters: {
@@ -69,15 +71,7 @@ export async function getAssetById(id: string) {
 }
 
 // ── Create Asset ─────────────────────────────────────────────
-export async function createAsset(data: {
-  name: string;
-  categoryId: string;
-  location?: string | null;
-  purchaseDate?: Date | null;
-  purchaseCost?: number | null;
-  warrantyExpiry?: Date | null;
-  serialNumber?: string | null;
-}) {
+export async function createAsset(data: z.infer<typeof createAssetSchema>) {
   const category = await prisma.category.findUnique({ where: { id: data.categoryId } });
   if (!category) throw new Error('Category not found');
 
@@ -107,14 +101,7 @@ export async function createAsset(data: {
 // ── Update Asset ─────────────────────────────────────────────
 export async function updateAsset(
   id: string,
-  data: {
-    name?: string;
-    categoryId?: string;
-    condition?: string;
-    location?: string | null;
-    warrantyExpiry?: Date | null;
-    serialNumber?: string | null;
-  }
+  data: z.infer<typeof updateAssetSchema>
 ) {
   const asset = await prisma.asset.findUnique({ where: { id } });
   if (!asset) throw new Error('Asset not found');

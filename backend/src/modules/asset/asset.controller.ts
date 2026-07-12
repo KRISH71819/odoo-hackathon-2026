@@ -49,7 +49,7 @@ export async function createAsset(req: AuthRequest, res: Response) {
 // ── GET /:id ─────────────────────────────────────────────────
 export async function getAssetById(req: AuthRequest, res: Response) {
   try {
-    const asset = await svc.getAssetById(req.params.id);
+    const asset = await svc.getAssetById(req.params.id as string);
     if (!asset) return res.status(404).json({ success: false, error: 'Asset not found' });
     res.json({ success: true, data: asset });
   } catch (err: any) {
@@ -64,7 +64,7 @@ export async function updateAsset(req: AuthRequest, res: Response) {
     if (!parsed.success) {
       return res.status(400).json({ success: false, error: parsed.error.errors[0].message });
     }
-    const asset = await svc.updateAsset(req.params.id, parsed.data);
+    const asset = await svc.updateAsset(req.params.id as string, parsed.data);
     res.json({ success: true, data: asset });
   } catch (err: any) {
     res.status(400).json({ success: false, error: err.message });
@@ -74,7 +74,7 @@ export async function updateAsset(req: AuthRequest, res: Response) {
 // ── DELETE /:id ──────────────────────────────────────────────
 export async function deleteAsset(req: AuthRequest, res: Response) {
   try {
-    await svc.deleteAsset(req.params.id);
+    await svc.deleteAsset(req.params.id as string);
     res.json({ success: true, data: { message: 'Asset retired successfully' } });
   } catch (err: any) {
     res.status(400).json({ success: false, error: err.message });
@@ -89,7 +89,7 @@ export async function allocateAsset(req: AuthRequest, res: Response) {
       return res.status(400).json({ success: false, error: parsed.error.errors[0].message });
     }
     const { allocatedToId, departmentId, reason } = parsed.data;
-    const allocation = await svc.allocateAsset(req.params.id, allocatedToId, departmentId, reason);
+    const allocation = await svc.allocateAsset(req.params.id as string, allocatedToId, departmentId, reason);
     res.status(201).json({ success: true, data: allocation });
   } catch (err: any) {
     res.status(400).json({ success: false, error: err.message });
@@ -104,7 +104,7 @@ export async function transferAsset(req: AuthRequest, res: Response) {
       return res.status(400).json({ success: false, error: parsed.error.errors[0].message });
     }
     const { newAllocatedToId, reason } = parsed.data;
-    const allocation = await svc.transferAsset(req.params.id, newAllocatedToId, reason);
+    const allocation = await svc.transferAsset(req.params.id as string, newAllocatedToId, reason);
     res.status(201).json({ success: true, data: allocation });
   } catch (err: any) {
     res.status(400).json({ success: false, error: err.message });
@@ -118,7 +118,7 @@ export async function returnAsset(req: AuthRequest, res: Response) {
     if (!parsed.success) {
       return res.status(400).json({ success: false, error: parsed.error.errors[0].message });
     }
-    const allocation = await svc.returnAsset(req.params.id, parsed.data.reason);
+    const allocation = await svc.returnAsset(req.params.id as string, parsed.data.reason);
     res.json({ success: true, data: allocation });
   } catch (err: any) {
     res.status(400).json({ success: false, error: err.message });
@@ -128,7 +128,7 @@ export async function returnAsset(req: AuthRequest, res: Response) {
 // ── PUT /allocations/:id/approve ────────────────────────────
 export async function approveAllocation(req: AuthRequest, res: Response) {
   try {
-    const allocation = await svc.approveAllocation(req.params.id, req.user!.userId);
+    const allocation = await svc.approveAllocation(req.params.id as string, req.user!.userId);
     res.json({ success: true, data: allocation });
   } catch (err: any) {
     res.status(400).json({ success: false, error: err.message });
@@ -138,7 +138,7 @@ export async function approveAllocation(req: AuthRequest, res: Response) {
 // ── PUT /allocations/:id/reject ─────────────────────────────
 export async function rejectAllocation(req: AuthRequest, res: Response) {
   try {
-    const allocation = await svc.rejectAllocation(req.params.id, req.user!.userId);
+    const allocation = await svc.rejectAllocation(req.params.id as string, req.user!.userId);
     res.json({ success: true, data: allocation });
   } catch (err: any) {
     res.status(400).json({ success: false, error: err.message });
@@ -148,7 +148,7 @@ export async function rejectAllocation(req: AuthRequest, res: Response) {
 // ── GET /:id/allocation-history ─────────────────────────────
 export async function getAllocationHistory(req: AuthRequest, res: Response) {
   try {
-    const history = await svc.getAllocationHistory(req.params.id);
+    const history = await svc.getAllocationHistory(req.params.id as string);
     res.json({ success: true, data: history });
   } catch (err: any) {
     res.status(500).json({ success: false, error: err.message });
