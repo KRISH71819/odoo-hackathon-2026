@@ -1,0 +1,25 @@
+{
+  "name": "assetflow",
+  "private": true,
+  "version": "1.0.0",
+  "description": "AssetFlow — Enterprise Asset & Resource Management System",
+  "workspaces": [
+    "packages/*",
+    "backend",
+    "frontend"
+  ],
+  "scripts": {
+    "dev:backend": "npm run dev --workspace=backend",
+    "dev:frontend": "npm run dev --workspace=frontend",
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "build:shared": "npm run build --workspace=@assetflow/shared",
+    "db:migrate": "npm run db:migrate --workspace=backend",
+    "db:seed": "npm run db:seed --workspace=backend",
+    "db:generate": "npm run db:generate --workspace=backend",
+    "setup": "npm install && npm run build:shared && npm run db:generate && npm run db:migrate && npm run db:seed"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.0",
+    "typescript": "^5.7.0"
+  }
+}
