@@ -9,12 +9,11 @@ const { Text } = Typography;
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
-const HOUR_START = 8;        // 8:00 AM
-const HOUR_END = 18;         // 6:00 PM
-const TOTAL_HOURS = HOUR_END - HOUR_START; // 10
-const ROW_HEIGHT = 60;       // px per hour (desktop)
+const HOUR_START = 8;
+const HOUR_END = 18;
+const TOTAL_HOURS = HOUR_END - HOUR_START;
+const ROW_HEIGHT = 60;
 const ROW_HEIGHT_MOBILE = 48;
-
 const HOURS = Array.from({ length: TOTAL_HOURS + 1 }, (_, i) => HOUR_START + i);
 
 // ─── Status styling ───────────────────────────────────────────────────────────
@@ -29,60 +28,51 @@ const STATUS_STYLES: Record<BookingStatus, React.CSSProperties> = {
     background: 'rgba(16, 185, 129, 0.85)',
     border: '1px solid #10b981',
     color: '#fff',
-    // pulse animation applied via className
   },
   COMPLETED: {
-    background: 'rgba(140, 140, 140, 0.55)',
+    background: 'rgba(140, 140, 140, 0.45)',
     border: '1px solid #52525b',
     color: '#a1a1aa',
   },
   CANCELLED: {
     background: `repeating-linear-gradient(
       -45deg,
-      rgba(239,68,68,0.08) 0px,
-      rgba(239,68,68,0.08) 6px,
-      rgba(0,0,0,0) 6px,
-      rgba(0,0,0,0) 12px
+      rgba(239,68,68,0.06) 0px,
+      rgba(239,68,68,0.06) 6px,
+      transparent 6px,
+      transparent 12px
     )`,
-    border: '1px solid rgba(239,68,68,0.25)',
+    border: '1px solid rgba(239,68,68,0.2)',
     color: '#71717a',
-    opacity: 0.6,
+    opacity: 0.65,
   },
 };
 
-const STATUS_LABEL: Record<BookingStatus, string> = {
+const STATUS_BADGE: Record<BookingStatus, string> = {
   UPCOMING: 'Upcoming',
   ONGOING: 'Live',
-  COMPLETED: 'Completed',
+  COMPLETED: 'Done',
   CANCELLED: 'Cancelled',
 };
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-/** Convert a Date/ISO string to minutes-since-midnight */
 function toMinutes(iso: string): number {
   const d = dayjs(iso);
   return d.hour() * 60 + d.minute();
 }
 
-/** Format ISO string to 12-hour time e.g. "2:30 PM" */
 function fmt12(iso: string): string {
   return dayjs(iso).format('h:mm A');
 }
 
-/** Format hour number to 12-hour label e.g. 13 → "1:00 PM" */
 function hourLabel(h: number): string {
   const suffix = h >= 12 ? 'PM' : 'AM';
   const h12 = h % 12 === 0 ? 12 : h % 12;
   return `${h12}:00 ${suffix}`;
 }
 
-/** Compute top offset and height in pixels for a booking block */
-function blockGeometry(
-  startIso: string,
-  endIso: string,
-  rowHeight: number
-): { top: number; height: number } {
+function blockGeometry(startIso: string, endIso: string, rowHeight: number) {
   const startMin = toMinutes(startIso);
   const endMin = toMinutes(endIso);
   const clampedStart = Math.max(startMin, HOUR_START * 60);
@@ -107,12 +97,6 @@ interface BookingCalendarProps {
   pendingSlot?: PendingSlot;
 }
 
-// ─── Back-to-back detector ───────────────────────────────────────────────────
-
-function isBackToBack(a: Booking, b: Booking): boolean {
-  return a.endTime === b.startTime || dayjs(a.endTime).isSame(dayjs(b.startTime));
-}
-
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export default function BookingCalendar({
@@ -122,22 +106,17 @@ export default function BookingCalendar({
   pendingSlot,
 }: BookingCalendarProps) {
   const dateStr = date.format('YYYY-MM-DD');
-
   const { bookings, loading, error } = useAvailability(resourceId, resourceType, dateStr);
 
-  // Sort bookings by startTime
   const sorted = useMemo(
     () => [...bookings].sort((a, b) => dayjs(a.startTime).diff(dayjs(b.startTime))),
     [bookings]
   );
 
-  // Detect mobile via CSS media — use a simple window width check
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 640;
   const rowH = isMobile ? ROW_HEIGHT_MOBILE : ROW_HEIGHT;
   const totalHeight = TOTAL_HOURS * rowH;
-  const timelineWidth = isMobile ? '100%' : 'calc(100% - 80px)';
 
-  // ── Loading ──────────────────────────────────────────────────────────────
   if (loading) {
     return (
       <div
@@ -156,7 +135,6 @@ export default function BookingCalendar({
     );
   }
 
-  // ── Error ────────────────────────────────────────────────────────────────
   if (error) {
     return (
       <Alert
@@ -171,7 +149,6 @@ export default function BookingCalendar({
 
   return (
     <>
-      {/* ── Keyframe style injected once ─────────────────────────────────── */}
       <style>{`
         @keyframes booking-pulse {
           0%   { box-shadow: 0 0 0 0 rgba(16,185,129,0.5); }
@@ -180,16 +157,6 @@ export default function BookingCalendar({
         }
         .booking-block-ONGOING {
           animation: booking-pulse 2s ease-in-out infinite;
-        }
-        @media (max-width: 639px) {
-          .booking-timeline-wrapper {
-            flex-direction: column !important;
-          }
-          .booking-hour-col {
-            flex-direction: row !important;
-            width: 100% !important;
-            height: auto !important;
-          }
         }
       `}</style>
 
@@ -222,20 +189,17 @@ export default function BookingCalendar({
         </div>
 
         {/* Timeline wrapper */}
-        <div
-          className="booking-timeline-wrapper"
-          style={{ display: 'flex', gap: 0, alignItems: 'flex-start' }}
-        >
-          {/* ── Hour labels column ──────────────────────────────────────── */}
+        <div style={{ display: 'flex', gap: 0, alignItems: 'flex-start', flexWrap: isMobile ? 'wrap' : 'nowrap' }}>
+
+          {/* Hour labels */}
           <div
-            className="booking-hour-col"
             style={{
               width: isMobile ? '100%' : 72,
               flexShrink: 0,
-              display: 'flex',
-              flexDirection: 'column',
               position: 'relative',
               height: isMobile ? 'auto' : totalHeight,
+              display: isMobile ? 'flex' : 'block',
+              flexWrap: 'wrap',
             }}
           >
             {HOURS.map((h, i) => (
@@ -244,20 +208,19 @@ export default function BookingCalendar({
                 style={{
                   position: isMobile ? 'relative' : 'absolute',
                   top: isMobile ? undefined : i * rowH,
-                  height: isMobile ? rowH : undefined,
+                  width: isMobile ? `${100 / (TOTAL_HOURS + 1)}%` : '100%',
                   display: 'flex',
                   alignItems: 'flex-start',
                   paddingTop: 2,
-                  width: '100%',
                 }}
               >
                 <Text
                   style={{
                     fontSize: 11,
-                    color: h === HOUR_START ? 'var(--text-secondary)' : 'var(--text-muted)',
-                    fontVariantNumeric: 'tabular-nums',
+                    color: 'var(--text-muted)',
                     whiteSpace: 'nowrap',
                     lineHeight: 1,
+                    fontVariantNumeric: 'tabular-nums',
                   }}
                 >
                   {hourLabel(h)}
@@ -266,16 +229,10 @@ export default function BookingCalendar({
             ))}
           </div>
 
-          {/* ── Timeline body ───────────────────────────────────────────── */}
-          <div
-            style={{
-              flex: 1,
-              position: 'relative',
-              height: totalHeight,
-              width: timelineWidth,
-            }}
-          >
-            {/* Hour grid lines */}
+          {/* Timeline body */}
+          <div style={{ flex: 1, position: 'relative', height: totalHeight, minWidth: 0 }}>
+
+            {/* Grid lines */}
             {HOURS.map((h, i) => (
               <div
                 key={`grid-${h}`}
@@ -285,11 +242,8 @@ export default function BookingCalendar({
                   left: 0,
                   right: 0,
                   height: 1,
-                  background:
-                    h === HOUR_START
-                      ? 'var(--border-strong)'
-                      : 'var(--border-subtle)',
-                  opacity: h === HOUR_START ? 1 : 0.5,
+                  background: i === 0 ? 'var(--border-strong)' : 'var(--border-subtle)',
+                  opacity: i === 0 ? 1 : 0.5,
                 }}
               />
             ))}
@@ -301,9 +255,9 @@ export default function BookingCalendar({
                   position: 'absolute',
                   inset: 0,
                   display: 'flex',
+                  flexDirection: 'column',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  flexDirection: 'column',
                   gap: 8,
                   pointerEvents: 'none',
                 }}
@@ -312,23 +266,25 @@ export default function BookingCalendar({
                   No bookings for this date
                 </Text>
                 <Text style={{ color: 'var(--text-muted)', fontSize: 12 }}>
-                  All slots are available from 8:00 AM to 6:00 PM
+                  All slots are available 8:00 AM – 6:00 PM
                 </Text>
               </div>
             )}
 
-            {/* Back-to-back dividers — rendered before blocks so blocks are on top */}
+            {/* Back-to-back green dividers */}
             {sorted.map((booking, idx) => {
               if (idx === 0) return null;
               const prev = sorted[idx - 1];
-              if (!isBackToBack(prev, booking)) return null;
-              const dividerTop = blockGeometry(booking.startTime, booking.endTime, rowH).top;
+              const prevEndMs = dayjs(prev.endTime).valueOf();
+              const currStartMs = dayjs(booking.startTime).valueOf();
+              if (prevEndMs !== currStartMs) return null;
+              const divTop = blockGeometry(booking.startTime, booking.endTime, rowH).top;
               return (
                 <div
                   key={`btb-${booking.id}`}
                   style={{
                     position: 'absolute',
-                    top: dividerTop,
+                    top: divTop,
                     left: 4,
                     right: 4,
                     height: 2,
@@ -336,7 +292,7 @@ export default function BookingCalendar({
                     borderRadius: 1,
                     zIndex: 3,
                   }}
-                  title="Back-to-back booking — both are allowed"
+                  title="Back-to-back booking — allowed"
                 />
               );
             })}
@@ -344,13 +300,12 @@ export default function BookingCalendar({
             {/* Booking blocks */}
             {sorted.map((booking) => {
               const { top, height } = blockGeometry(booking.startTime, booking.endTime, rowH);
-              const statusStyle = STATUS_STYLES[booking.status] ?? STATUS_STYLES.UPCOMING;
-
+              const style = STATUS_STYLES[booking.status] ?? STATUS_STYLES.UPCOMING;
               return (
                 <div
                   key={booking.id}
                   className={`booking-block-${booking.status}`}
-                  title={`${booking.title}\n${fmt12(booking.startTime)} – ${fmt12(booking.endTime)}\nBooked by: ${booking.bookedBy?.name ?? 'Unknown'}`}
+                  title={`${booking.title} • ${fmt12(booking.startTime)} – ${fmt12(booking.endTime)}`}
                   style={{
                     position: 'absolute',
                     top: top + 1,
@@ -360,84 +315,44 @@ export default function BookingCalendar({
                     borderRadius: 6,
                     padding: '4px 8px',
                     overflow: 'hidden',
-                    cursor: 'default',
                     zIndex: 2,
                     display: 'flex',
                     flexDirection: 'column',
                     justifyContent: 'center',
-                    transition: 'filter 0.15s ease',
-                    ...statusStyle,
+                    ...style,
                   }}
                 >
-                  {/* Status dot + label */}
                   <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
                     <div
                       style={{
                         width: 6,
                         height: 6,
                         borderRadius: '50%',
-                        background:
-                          booking.status === 'ONGOING'
-                            ? '#fff'
-                            : booking.status === 'COMPLETED'
-                            ? '#71717a'
-                            : 'rgba(255,255,255,0.7)',
+                        background: 'rgba(255,255,255,0.7)',
                         flexShrink: 0,
                       }}
                     />
-                    <Text
-                      style={{
-                        fontSize: 10,
-                        fontWeight: 700,
-                        textTransform: 'uppercase',
-                        letterSpacing: '0.06em',
-                        color: 'inherit',
-                        opacity: 0.8,
-                      }}
-                    >
-                      {STATUS_LABEL[booking.status]}
+                    <Text style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'inherit', opacity: 0.85 }}>
+                      {STATUS_BADGE[booking.status]}
                     </Text>
                   </div>
-
                   {height > 32 && (
-                    <Text
-                      ellipsis
-                      style={{
-                        fontSize: 12,
-                        fontWeight: 600,
-                        color: 'inherit',
-                        lineHeight: 1.3,
-                        marginTop: 1,
-                      }}
-                    >
+                    <Text ellipsis style={{ fontSize: 12, fontWeight: 600, color: 'inherit', lineHeight: 1.3, marginTop: 1 }}>
                       {booking.title}
                     </Text>
                   )}
-
                   {height > 50 && (
-                    <Text
-                      style={{
-                        fontSize: 11,
-                        color: 'inherit',
-                        opacity: 0.75,
-                        lineHeight: 1.2,
-                        marginTop: 2,
-                      }}
-                    >
-                      {fmt12(booking.startTime)} – {fmt12(booking.endTime)}
+                    <Text style={{ fontSize: 11, color: 'inherit', opacity: 0.75, lineHeight: 1.2, marginTop: 1 }}>
+                      Booked — {fmt12(booking.startTime)} to {fmt12(booking.endTime)}
                     </Text>
                   )}
                 </div>
               );
             })}
 
-            {/* ── Pending slot overlay (conflict preview from form) ─────── */}
+            {/* Pending slot overlay */}
             {pendingSlot && (() => {
-              const { top, height } = blockGeometry(
-                pendingSlot.startTime,
-                pendingSlot.endTime,
-                rowH
-              );
+              const { top, height } = blockGeometry(pendingSlot.startTime, pendingSlot.endTime, rowH);
               return (
                 <div
                   style={{
@@ -448,8 +363,8 @@ export default function BookingCalendar({
                     height: height - 2,
                     borderRadius: 6,
                     background: pendingSlot.hasConflict
-                      ? 'rgba(239,68,68,0.25)'
-                      : 'rgba(16,185,129,0.2)',
+                      ? 'rgba(239,68,68,0.2)'
+                      : 'rgba(16,185,129,0.18)',
                     border: `2px dashed ${pendingSlot.hasConflict ? '#ef4444' : '#10b981'}`,
                     zIndex: 4,
                     display: 'flex',
@@ -458,16 +373,8 @@ export default function BookingCalendar({
                     pointerEvents: 'none',
                   }}
                 >
-                  <Text
-                    style={{
-                      fontSize: 11,
-                      fontWeight: 700,
-                      color: pendingSlot.hasConflict ? '#ef4444' : '#10b981',
-                    }}
-                  >
-                    {pendingSlot.hasConflict
-                      ? '⚠ Conflict detected'
-                      : '✓ Slot available'}
+                  <Text style={{ fontSize: 11, fontWeight: 700, color: pendingSlot.hasConflict ? '#ef4444' : '#10b981' }}>
+                    {pendingSlot.hasConflict ? '⚠ Conflict detected' : '✓ Slot available'}
                   </Text>
                 </div>
               );

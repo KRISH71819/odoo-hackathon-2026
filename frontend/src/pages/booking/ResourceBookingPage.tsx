@@ -29,11 +29,11 @@ interface ResourceOption {
   id: string;
   name: string;
   type: 'facility' | 'asset';
-  subType?: string;       // facility.type or asset category
+  subType?: string;
   capacity?: number;
 }
 
-// ─── Resource fetching hooks (read-only — facilities & assets from org/asset APIs) ──
+// ─── Data hooks (read-only — no modification to useBookings.ts) ───────────────
 
 function useResourceOptions() {
   const { data: facilities = [], isLoading: fLoading } = useQuery({
@@ -71,7 +71,6 @@ export default function ResourceBookingPage() {
   const [isFormOpen, setIsFormOpen] = useState(false);
 
   const { options, isLoading: resourcesLoading } = useResourceOptions();
-
   const selectedResource = options.find((o) => o.id === selectedResourceId);
 
   const handleBookSuccess = useCallback(() => {
@@ -79,7 +78,6 @@ export default function ResourceBookingPage() {
     message.success('Booking created successfully!');
   }, [message]);
 
-  // ── Select option renderer ──────────────────────────────────────────────────
   const selectOptions = options.map((o) => ({
     value: o.id,
     label: (
@@ -163,7 +161,6 @@ export default function ResourceBookingPage() {
           flexWrap: 'wrap',
         }}
       >
-        {/* Resource selector */}
         <Select
           showSearch
           allowClear
@@ -183,7 +180,6 @@ export default function ResourceBookingPage() {
           }
         />
 
-        {/* Date picker */}
         <DatePicker
           value={selectedDate}
           onChange={(d) => d && setSelectedDate(d)}
@@ -194,7 +190,6 @@ export default function ResourceBookingPage() {
           disabledDate={(d) => d.isBefore(dayjs().startOf('day'))}
         />
 
-        {/* Book a slot button */}
         <Button
           type="primary"
           size="large"
@@ -207,7 +202,6 @@ export default function ResourceBookingPage() {
               : undefined,
             border: 'none',
             fontWeight: 600,
-            letterSpacing: '0.01em',
             boxShadow: selectedResourceId
               ? '0 4px 12px rgba(16, 185, 129, 0.3)'
               : undefined,
