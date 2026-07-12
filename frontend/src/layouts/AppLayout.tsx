@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import logo from '../assets/logo.png';
 import { Layout, Menu, Avatar, Dropdown, Typography, Space, Badge } from 'antd';
 import {
   DashboardOutlined,
@@ -21,36 +22,42 @@ import { useAuth } from '../context/AuthContext';
 const { Sider, Header, Content } = Layout;
 const { Text } = Typography;
 
-const menuItems = [
+const allMenuItems = [
   {
     key: '/',
     icon: <DashboardOutlined />,
     label: 'Dashboard',
+    roles: ['ADMIN', 'MANAGER', 'EMPLOYEE'],
   },
   {
     key: '/assets',
     icon: <AppstoreOutlined />,
     label: 'Assets',
+    roles: ['ADMIN', 'MANAGER', 'EMPLOYEE'],
   },
   {
     key: '/bookings',
     icon: <CalendarOutlined />,
     label: 'Bookings',
+    roles: ['ADMIN', 'MANAGER', 'EMPLOYEE'],
   },
   {
     key: '/maintenance',
     icon: <ToolOutlined />,
     label: 'Maintenance',
+    roles: ['ADMIN', 'MANAGER', 'EMPLOYEE'],
   },
   {
     key: '/audits',
     icon: <AuditOutlined />,
     label: 'Audits',
+    roles: ['ADMIN', 'MANAGER'],
   },
   {
     key: 'org',
     icon: <BankOutlined />,
     label: 'Organization',
+    roles: ['ADMIN', 'MANAGER'],
     children: [
       { key: '/org/departments', icon: <TeamOutlined />, label: 'Departments' },
       { key: '/org/categories', icon: <TagsOutlined />, label: 'Categories' },
@@ -61,6 +68,7 @@ const menuItems = [
     key: '/reports',
     icon: <BarChartOutlined />,
     label: 'Reports',
+    roles: ['ADMIN', 'MANAGER'],
   },
 ];
 
@@ -69,6 +77,19 @@ export default function AppLayout() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+
+  const [openKeys, setOpenKeys] = useState<string[]>(location.pathname.startsWith('/org') ? ['org'] : []);
+
+  React.useEffect(() => {
+    if (location.pathname.startsWith('/org')) {
+      setOpenKeys(['org']);
+    }
+  }, [location.pathname]);
+
+  // Filter menu items by user role
+  const menuItems = allMenuItems
+    .filter((item) => !item.roles || item.roles.includes(user?.role || 'EMPLOYEE'))
+    .map(({ roles: _roles, ...item }) => item);
 
   const userMenuItems = [
     {
@@ -107,7 +128,7 @@ export default function AppLayout() {
         collapsible
         collapsed={collapsed}
         onCollapse={setCollapsed}
-        width={260}
+        width={240}
         theme="dark"
         style={{
           background: 'var(--bg-surface)',
@@ -123,7 +144,7 @@ export default function AppLayout() {
       >
         {/* Brand */}
         <div className="sidebar-brand" style={{ justifyContent: collapsed ? 'center' : 'flex-start' }}>
-          <div className="sidebar-brand-icon">AF</div>
+          <img src={logo} alt="AssetFlow" style={{ width: 32, height: 32, borderRadius: 8, objectFit: 'cover', flexShrink: 0 }} />
           {!collapsed && <span className="sidebar-brand-text">AssetFlow</span>}
         </div>
 
@@ -132,19 +153,20 @@ export default function AppLayout() {
           theme="dark"
           mode="inline"
           selectedKeys={[location.pathname]}
-          defaultOpenKeys={location.pathname.startsWith('/org') ? ['org'] : []}
+          openKeys={openKeys}
+          onOpenChange={(keys) => setOpenKeys(keys)}
           items={menuItems}
           onClick={({ key }) => {
             if (key && key !== 'org') {
               navigate(key);
             }
           }}
-          style={{ borderRight: 'none' }}
+          style={{ borderRight: 'none', marginTop: 8 }}
         />
       </Sider>
 
       {/* Main Area */}
-      <Layout style={{ marginLeft: collapsed ? 80 : 260, transition: 'margin-left 0.2s' }}>
+      <Layout style={{ marginLeft: collapsed ? 80 : 240, transition: 'margin-left 0.2s' }}>
         {/* Header */}
         <Header style={{
           display: 'flex',

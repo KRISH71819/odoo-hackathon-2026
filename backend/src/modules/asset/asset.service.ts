@@ -131,7 +131,8 @@ export async function allocateAsset(
   assetId: string,
   allocatedToId: string,
   departmentId?: string | null,
-  reason?: string | null
+  reason?: string | null,
+  expectedReturnDate?: Date | null
 ) {
   const asset = await prisma.asset.findUnique({ where: { id: assetId } });
   if (!asset) throw new Error('Asset not found');
@@ -153,6 +154,7 @@ export async function allocateAsset(
         allocationType: 'ALLOCATE',
         status: 'PENDING',
         reason: reason || undefined,
+        expectedReturnDate: expectedReturnDate ?? undefined,
       },
       include: {
         allocatedTo: { select: { id: true, name: true, email: true } },

@@ -3,8 +3,8 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider = "sqlite"
+  url      = "file:./dev.db"
 }
 
 // =================== AUTH & ORG DOMAIN (Member 1) ===================
@@ -76,7 +76,9 @@ enum AssetStatus {
   ALLOCATED
   RESERVED
   UNDER_MAINTENANCE
+  LOST
   RETIRED
+  DISPOSED
 }
 
 enum AssetCondition {
@@ -97,7 +99,7 @@ model Asset {
   condition     AssetCondition @default(NEW)
   location      String?
   purchaseDate  DateTime?
-  purchaseCost  Decimal?      @db.Decimal(12,2)
+  purchaseCost  Float?
   warrantyExpiry DateTime?
   serialNumber  String?
   qrCode        String?       @unique
@@ -111,21 +113,24 @@ model Asset {
 }
 
 model AssetAllocation {
-  id              String   @id @default(uuid())
-  assetId         String
-  asset           Asset    @relation(fields: [assetId], references: [id])
-  allocatedToId   String
-  allocatedTo     User     @relation("AllocatedTo", fields: [allocatedToId], references: [id])
-  departmentId    String?
-  department      Department? @relation(fields: [departmentId], references: [id])
-  approvedById    String?
-  approvedBy      User?    @relation("ApprovedBy", fields: [approvedById], references: [id])
-  allocationType  String
-  status          String   @default("PENDING")
-  reason          String?
-  allocatedAt     DateTime @default(now())
-  returnedAt      DateTime?
+  id                   String      @id @default(uuid())
+  assetId              String
+  asset                Asset       @relation(fields: [assetId], references: [id])
+  allocatedToId        String
+  allocatedTo          User        @relation("AllocatedTo", fields: [allocatedToId], references: [id])
+  departmentId         String?
+  department           Department? @relation(fields: [departmentId], references: [id])
+  approvedById         String?
+  approvedBy           User?       @relation("ApprovedBy", fields: [approvedById], references: [id])
+  allocationType       String
+  status               String      @default("PENDING")
+  reason               String?
+  expectedReturnDate   DateTime?   // P0/P3: enables overdue auto-flagging
+  returnConditionNotes String?     // P3: condition notes on return
+  allocatedAt          DateTime    @default(now())
+  returnedAt           DateTime?
 }
+
 
 // =================== BOOKING DOMAIN (Member 3) ===================
 
@@ -191,7 +196,7 @@ model MaintenanceRequest {
   status         MaintenanceStatus   @default(PENDING)
   description    String
   resolutionNote String?
-  cost           Decimal?            @db.Decimal(12,2)
+  cost           Float?
   requestedAt    DateTime            @default(now())
   resolvedAt     DateTime?
 }

@@ -55,7 +55,7 @@ export default function ReportsPage() {
     setDownloading(true);
     try {
       const response = await client.get(`/reports/${reportType}/export`, { params: { format }, responseType: 'blob' });
-      const url = URL.createObjectURL(new Blob([response.data], { type: response.headers['content-type'] }));
+      const url = URL.createObjectURL(new Blob([response.data], { type: response.headers['content-type'] as string }));
       const link = document.createElement('a');
       link.href = url;
       link.download = `${reportType}.${format}`;

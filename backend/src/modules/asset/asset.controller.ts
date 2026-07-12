@@ -88,8 +88,8 @@ export async function allocateAsset(req: AuthRequest, res: Response) {
     if (!parsed.success) {
       return res.status(400).json({ success: false, error: parsed.error.errors[0].message });
     }
-    const { allocatedToId, departmentId, reason } = parsed.data;
-    const allocation = await svc.allocateAsset(req.params.id as string, allocatedToId, departmentId, reason);
+    const { allocatedToId, departmentId, reason, expectedReturnDate } = parsed.data;
+    const allocation = await svc.allocateAsset(req.params.id as string, allocatedToId, departmentId, reason, expectedReturnDate);
     res.status(201).json({ success: true, data: allocation });
   } catch (err: any) {
     res.status(400).json({ success: false, error: err.message });

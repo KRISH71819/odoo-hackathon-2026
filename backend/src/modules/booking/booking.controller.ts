@@ -195,7 +195,7 @@ export async function getBookingByIdController(
   _next: NextFunction
 ): Promise<void> {
   try {
-    const booking = await getBookingById(req.params.id);
+    const booking = await getBookingById(req.params.id as string);
     res.json({ success: true, data: booking });
   } catch (err) {
     handleError(err, res);
@@ -222,7 +222,7 @@ export async function updateBookingController(
       return;
     }
 
-    const updated = await updateBooking(req.params.id, parsed.data);
+    const updated = await updateBooking(req.params.id as string, parsed.data);
     res.json({ success: true, data: updated });
   } catch (err) {
     handleError(err, res);
@@ -238,7 +238,7 @@ export async function cancelBookingController(
   _next: NextFunction
 ): Promise<void> {
   try {
-    const cancelled = await cancelBooking(req.params.id);
+    const cancelled = await cancelBooking(req.params.id as string);
     res.json({ success: true, data: cancelled });
   } catch (err) {
     handleError(err, res);

@@ -123,8 +123,8 @@ export default function DepartmentsPage() {
       key: 'children',
       render: (_: any, record: Department) => (
         <Space size={4} wrap>
-          {record.children.length > 0
-            ? record.children.map(c => (
+          {(record.children || []).length > 0
+            ? (record.children || []).map(c => (
                 <Tag key={c.id} style={{ background: 'var(--bg-elevated)', border: 'none', color: 'var(--text-secondary)' }}>
                   {c.name}
                 </Tag>

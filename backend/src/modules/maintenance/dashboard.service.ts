@@ -15,6 +15,7 @@ export async function getOverview() {
     upcomingReturns,
     pendingMaintenance,
     activeMaintenance,
+    assetsOverdueForReturn,
   ] = await Promise.all([
     prisma.asset.count({ where: { status: { not: 'RETIRED' } } }),
     prisma.asset.count({ where: { status: 'AVAILABLE' } }),
@@ -25,6 +26,15 @@ export async function getOverview() {
     prisma.asset.count({ where: { warrantyExpiry: { gte: now, lte: warrantyWindowEnd } } }),
     prisma.maintenanceRequest.count({ where: { status: 'PENDING' } }),
     prisma.maintenanceRequest.count({ where: { status: { in: ['APPROVED', 'TECHNICIAN_ASSIGNED', 'IN_PROGRESS'] } } }),
+    // P0: Count allocations where expectedReturnDate has passed and asset hasn't been returned
+    prisma.assetAllocation.count({
+      where: {
+        status: 'APPROVED',
+        returnedAt: null,
+        expectedReturnDate: { lt: now },
+        allocationType: { not: 'RETURN' },
+      },
+    }),
   ]);
 
   return {
@@ -35,12 +45,12 @@ export async function getOverview() {
     activeBookings,
     pendingReturns,
     upcomingReturns,
-    // The current schema has no planned/scheduled return date. Returning 0 avoids inventing overdue data.
-    assetsOverdueForReturn: 0,
+    assetsOverdueForReturn,
     pendingMaintenance,
     activeMaintenance,
   };
 }
+
 
 export async function getRecentActivity(limit = 10) {
   const activities = await prisma.activityLog.findMany({

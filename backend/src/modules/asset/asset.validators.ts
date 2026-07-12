@@ -10,12 +10,15 @@ export const createAssetSchema = z.object({
   serialNumber: z.string().optional().nullable(),
 });
 
-export const updateAssetSchema = createAssetSchema.partial();
+export const updateAssetSchema = createAssetSchema.partial().extend({
+  status: z.enum(['AVAILABLE', 'ALLOCATED', 'RESERVED', 'UNDER_MAINTENANCE', 'RETIRED']).optional(),
+});
 
 export const allocateAssetSchema = z.object({
   allocatedToId: z.string().uuid('Invalid user ID'),
   departmentId: z.string().uuid('Invalid department ID').optional().nullable(),
   reason: z.string().optional().nullable(),
+  expectedReturnDate: z.coerce.date().optional().nullable(),
 });
 
 export const transferAssetSchema = z.object({
