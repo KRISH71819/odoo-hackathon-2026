@@ -78,7 +78,6 @@ function AppRoutes() {
 
         {/* Assets (Member 2) */}
         <Route path="/assets" element={<AssetDirectoryPage />} />
-        <Route path="/assets/register" element={<AssetRegistrationForm />} />
         <Route path="/assets/:id" element={<AssetDetailPage />} />
         <Route path="/assets/:id/allocate" element={<AllocationTransferPage />} />
 

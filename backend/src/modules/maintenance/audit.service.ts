@@ -1,4 +1,5 @@
 import prisma from '../../config/db';
+import { AssetStatus } from '@prisma/client';
 import type { CreateAuditInput, UpdateAuditItemInput } from './audit.validators';
 
 function createHttpError(message: string, statusCode: number) {
@@ -154,6 +155,9 @@ export async function generateReport(auditId: string) {
     ? Number(((verifiedCount / totalAssetsAudited) * 100).toFixed(1))
     : 0;
 
+  // P0: Assets that were never verified (not physically found) are auto-marked LOST
+  const unverifiedItems = audit.items.filter((item) => !item.isVerified);
+
   const report = {
     auditId: audit.id,
     title: audit.title,
@@ -161,6 +165,7 @@ export async function generateReport(auditId: string) {
     verifiedCount,
     verificationPercentage,
     discrepancyCount: discrepancies.length,
+    autoMarkedLostCount: unverifiedItems.length,
     discrepantAssets: discrepancies.map((item) => ({
       auditItemId: item.id,
       asset: { id: item.asset.id, tag: item.asset.tag, name: item.asset.name },
@@ -170,16 +175,24 @@ export async function generateReport(auditId: string) {
       actualCondition: item.actualCondition,
       discrepancyNote: item.discrepancyNote,
     })),
+    lostAssets: unverifiedItems.map((item) => ({
+      auditItemId: item.id,
+      asset: { id: item.asset.id, tag: item.asset.tag, name: item.asset.name },
+    })),
   };
 
   await prisma.$transaction([
     prisma.audit.update({ where: { id: auditId }, data: { status: 'COMPLETED', completedDate: new Date() } }),
+    // P0: Auto-update all unverified assets to LOST status
+    ...unverifiedItems.map((item) =>
+      prisma.asset.update({ where: { id: item.asset.id }, data: { status: AssetStatus.LOST } })
+    ),
     prisma.notification.create({
       data: {
         userId: audit.conductedById,
         type: 'AUDIT',
         title: 'Audit completed',
-        message: `Audit ${audit.title} completed — ${discrepancies.length} discrepancies found.`,
+        message: `Audit ${audit.title} completed — ${discrepancies.length} discrepancies, ${unverifiedItems.length} assets marked Lost.`,
         link: `/audits?audit=${auditId}`,
       },
     }),

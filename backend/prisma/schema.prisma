@@ -76,7 +76,9 @@ enum AssetStatus {
   ALLOCATED
   RESERVED
   UNDER_MAINTENANCE
+  LOST
   RETIRED
+  DISPOSED
 }
 
 enum AssetCondition {
@@ -111,21 +113,24 @@ model Asset {
 }
 
 model AssetAllocation {
-  id              String   @id @default(uuid())
-  assetId         String
-  asset           Asset    @relation(fields: [assetId], references: [id])
-  allocatedToId   String
-  allocatedTo     User     @relation("AllocatedTo", fields: [allocatedToId], references: [id])
-  departmentId    String?
-  department      Department? @relation(fields: [departmentId], references: [id])
-  approvedById    String?
-  approvedBy      User?    @relation("ApprovedBy", fields: [approvedById], references: [id])
-  allocationType  String
-  status          String   @default("PENDING")
-  reason          String?
-  allocatedAt     DateTime @default(now())
-  returnedAt      DateTime?
+  id                   String      @id @default(uuid())
+  assetId              String
+  asset                Asset       @relation(fields: [assetId], references: [id])
+  allocatedToId        String
+  allocatedTo          User        @relation("AllocatedTo", fields: [allocatedToId], references: [id])
+  departmentId         String?
+  department           Department? @relation(fields: [departmentId], references: [id])
+  approvedById         String?
+  approvedBy           User?       @relation("ApprovedBy", fields: [approvedById], references: [id])
+  allocationType       String
+  status               String      @default("PENDING")
+  reason               String?
+  expectedReturnDate   DateTime?   // P0/P3: enables overdue auto-flagging
+  returnConditionNotes String?     // P3: condition notes on return
+  allocatedAt          DateTime    @default(now())
+  returnedAt           DateTime?
 }
+
 
 // =================== BOOKING DOMAIN (Member 3) ===================
 

@@ -82,28 +82,19 @@ export const darkTheme: ThemeConfig = {
       colorWarning: '#f97316',
       colorWarningBg: 'rgba(249, 115, 22, 0.12)',
       colorWarningBorder: 'rgba(249, 115, 22, 0.3)',
-      colorProcessing: '#06b6d4',
     },
     Alert: {
       colorInfoBg: 'rgba(6, 182, 212, 0.08)',
       colorInfoBorder: 'rgba(6, 182, 212, 0.25)',
-      colorInfoText: '#fafafa',
-      colorInfoIcon: '#06b6d4',
 
       colorSuccessBg: 'rgba(34, 197, 94, 0.08)',
       colorSuccessBorder: 'rgba(34, 197, 94, 0.25)',
-      colorSuccessText: '#fafafa',
-      colorSuccessIcon: '#22c55e',
 
       colorWarningBg: 'rgba(245, 158, 11, 0.08)',
       colorWarningBorder: 'rgba(245, 158, 11, 0.2)',
-      colorWarningText: '#fafafa',
-      colorWarningIcon: '#f59e0b',
 
       colorErrorBg: 'rgba(239, 68, 68, 0.08)',
       colorErrorBorder: 'rgba(239, 68, 68, 0.25)',
-      colorErrorText: '#fafafa',
-      colorErrorIcon: '#ef4444',
     },
     Statistic: {
       colorTextDescription: '#a1a1aa',
