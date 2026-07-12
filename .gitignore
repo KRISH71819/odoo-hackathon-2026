@@ -48,3 +48,4 @@ Thumbs.db
 # Coverage
 coverage/
 plan.md 
+*.db 

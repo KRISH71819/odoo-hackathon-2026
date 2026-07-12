@@ -47,7 +47,7 @@ export async function updateMaintenanceRequest(req: AuthRequest, res: Response) 
   const parsed = updateMaintenanceSchema.safeParse(req.body);
   if (!parsed.success) return sendValidationError(res, parsed.error.errors[0]?.message);
   try {
-    const request = await maintenanceService.updateMaintenanceRequest(req.params.id, parsed.data);
+    const request = await maintenanceService.updateMaintenanceRequest(req.params.id as string, parsed.data);
     res.json({ success: true, data: request });
   } catch (error) {
     sendError(res, error);
@@ -58,7 +58,7 @@ export async function updateMaintenanceStatus(req: AuthRequest, res: Response) {
   const parsed = updateMaintenanceStatusSchema.safeParse(req.body);
   if (!parsed.success) return sendValidationError(res, parsed.error.errors[0]?.message);
   try {
-    const request = await maintenanceService.updateStatus(req.params.id, parsed.data, req.user!.userId);
+    const request = await maintenanceService.updateStatus(req.params.id as string, parsed.data, req.user!.userId);
     res.json({ success: true, data: request });
   } catch (error) {
     sendError(res, error);
@@ -69,7 +69,7 @@ export async function assignTechnician(req: AuthRequest, res: Response) {
   const parsed = assignTechnicianSchema.safeParse(req.body);
   if (!parsed.success) return sendValidationError(res, parsed.error.errors[0]?.message);
   try {
-    const request = await maintenanceService.assignTechnician(req.params.id, parsed.data.assignedToId, req.user!.userId);
+    const request = await maintenanceService.assignTechnician(req.params.id as string, parsed.data.assignedToId, req.user!.userId);
     res.json({ success: true, data: request });
   } catch (error) {
     sendError(res, error);

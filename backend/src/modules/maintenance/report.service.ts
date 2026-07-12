@@ -264,5 +264,5 @@ function toCsv(data: unknown) {
     const plain = value === null || value === undefined ? '' : typeof value === 'object' ? JSON.stringify(value) : String(value);
     return `"${plain.replace(/"/g, '""')}"`;
   };
-  return [headers.join(','), ...records.map((record) => headers.map((header) => escape(record[header])).join(','))].join('\n');
+  return [headers.join(','), ...records.map((record) => headers.map((header) => escape((record as Record<string, unknown>)[header])).join(','))].join('\n');
 }

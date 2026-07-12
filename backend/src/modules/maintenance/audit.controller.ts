@@ -27,7 +27,7 @@ export async function createAudit(req: AuthRequest, res: Response) {
 
 export async function getAuditById(req: AuthRequest, res: Response) {
   try {
-    res.json({ success: true, data: await auditService.getAuditById(req.params.id) });
+    res.json({ success: true, data: await auditService.getAuditById(req.params.id as string) });
   } catch (error) {
     sendError(res, error);
   }
@@ -37,7 +37,7 @@ export async function updateAuditItem(req: AuthRequest, res: Response) {
   const parsed = updateAuditItemSchema.safeParse(req.body);
   if (!parsed.success) return sendValidationError(res, parsed.error.errors[0]?.message);
   try {
-    const item = await auditService.updateAuditItem(req.params.auditId, req.params.itemId, parsed.data);
+    const item = await auditService.updateAuditItem(req.params.auditId as string, req.params.itemId as string, parsed.data);
     res.json({ success: true, data: item });
   } catch (error) {
     sendError(res, error);
@@ -46,7 +46,7 @@ export async function updateAuditItem(req: AuthRequest, res: Response) {
 
 export async function generateReport(req: AuthRequest, res: Response) {
   try {
-    res.json({ success: true, data: await auditService.generateReport(req.params.id) });
+    res.json({ success: true, data: await auditService.generateReport(req.params.id as string) });
   } catch (error) {
     sendError(res, error);
   }

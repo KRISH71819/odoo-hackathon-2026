@@ -3,8 +3,8 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider = "sqlite"
+  url      = "file:./dev.db"
 }
 
 // =================== AUTH & ORG DOMAIN (Member 1) ===================
@@ -97,7 +97,7 @@ model Asset {
   condition     AssetCondition @default(NEW)
   location      String?
   purchaseDate  DateTime?
-  purchaseCost  Decimal?      @db.Decimal(12,2)
+  purchaseCost  Float?
   warrantyExpiry DateTime?
   serialNumber  String?
   qrCode        String?       @unique
@@ -191,7 +191,7 @@ model MaintenanceRequest {
   status         MaintenanceStatus   @default(PENDING)
   description    String
   resolutionNote String?
-  cost           Decimal?            @db.Decimal(12,2)
+  cost           Float?
   requestedAt    DateTime            @default(now())
   resolvedAt     DateTime?
 }

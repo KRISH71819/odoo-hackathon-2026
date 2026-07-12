@@ -42,17 +42,23 @@ function useResourceOptions() {
     staleTime: 5 * 60 * 1000,
   });
 
-  const { data: assets = [], isLoading: aLoading } = useQuery({
+  const { data: assetsRes, isLoading: aLoading } = useQuery({
     queryKey: ['assets-for-booking'],
     queryFn: () => client.get('/assets').then((r) => r.data.data ?? r.data),
     staleTime: 5 * 60 * 1000,
   });
 
+  const assetsList = Array.isArray(assetsRes)
+    ? assetsRes
+    : Array.isArray(assetsRes?.data)
+    ? assetsRes.data
+    : [];
+
   const options: ResourceOption[] = [
     ...(facilities as Array<{ id: string; name: string; type: string; capacity?: number }>).map(
       (f) => ({ id: f.id, name: f.name, type: 'facility' as const, subType: f.type, capacity: f.capacity })
     ),
-    ...(assets as Array<{ id: string; name: string; category?: { name: string }; status: string }>)
+    ...(assetsList as Array<{ id: string; name: string; category?: { name: string }; status: string }>)
       .filter((a) => a.status !== 'UNDER_MAINTENANCE' && a.status !== 'RETIRED')
       .map((a) => ({ id: a.id, name: a.name, type: 'asset' as const, subType: a.category?.name })),
   ];

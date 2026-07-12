@@ -20,7 +20,7 @@ export async function listNotifications(req: AuthRequest, res: Response) {
 
 export async function markAsRead(req: AuthRequest, res: Response) {
   try {
-    const notification = await notificationService.markAsRead(req.params.id, req.user!.userId);
+    const notification = await notificationService.markAsRead(req.params.id as string, req.user!.userId);
     res.json({ success: true, data: notification });
   } catch (error) {
     sendError(res, error);

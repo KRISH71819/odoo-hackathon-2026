@@ -1,4 +1,5 @@
 import React from 'react';
+import logo from './assets/logo.png';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { ConfigProvider, App as AntApp } from 'antd';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -8,22 +9,29 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 // Layouts
 import AppLayout from './layouts/AppLayout';
 
-// Pages — Member 1 (Auth & Org)
+// Pages — Auth (Member 1)
 import LoginPage from './pages/LoginPage';
+
+// Pages — Organization (Member 1)
 import DepartmentsPage from './pages/org/DepartmentsPage';
 import CategoriesPage from './pages/org/CategoriesPage';
 import FacilitiesPage from './pages/org/FacilitiesPage';
 
-// Placeholder pages — Members 2, 3, 4
-import {
-  DashboardPage,
-  AssetsPage,
-  BookingsPage,
-  MaintenancePage,
-  AuditsPage,
-  ReportsPage,
-  NotificationsPage,
-} from './pages/PlaceholderPages';
+// Pages — Assets (Member 2)
+import AssetDirectoryPage from './pages/assets/AssetDirectoryPage';
+import AssetRegistrationForm from './pages/assets/AssetRegistrationForm';
+import AssetDetailPage from './pages/assets/AssetDetailPage';
+import AllocationTransferPage from './pages/assets/AllocationTransferPage';
+
+// Pages — Bookings (Member 3)
+import ResourceBookingPage from './pages/booking/ResourceBookingPage';
+
+// Pages — Maintenance & Dashboard (Member 4)
+import DashboardPage from './pages/maintenance/DashboardPage';
+import MaintenanceKanbanPage from './pages/maintenance/MaintenanceKanbanPage';
+import AuditPage from './pages/maintenance/AuditPage';
+import ReportsPage from './pages/maintenance/ReportsPage';
+import NotificationsPage from './pages/maintenance/NotificationsPage';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -47,9 +55,7 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
         justifyContent: 'center',
         background: 'var(--bg-deepest)',
       }}>
-        <div className="sidebar-brand-icon" style={{ width: 56, height: 56, fontSize: 22, animation: 'pulse 2s ease-in-out infinite' }}>
-          AF
-        </div>
+        <img src={logo} alt="AssetFlow" style={{ width: 56, height: 56, borderRadius: 12, objectFit: 'cover', animation: 'pulse 2s ease-in-out infinite' }} />
       </div>
     );
   }
@@ -67,15 +73,25 @@ function AppRoutes() {
 
       {/* Protected */}
       <Route element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>
+        {/* Dashboard (Member 4) */}
         <Route path="/" element={<DashboardPage />} />
-        <Route path="/assets" element={<AssetsPage />} />
-        <Route path="/bookings" element={<BookingsPage />} />
-        <Route path="/maintenance" element={<MaintenancePage />} />
-        <Route path="/audits" element={<AuditsPage />} />
+
+        {/* Assets (Member 2) */}
+        <Route path="/assets" element={<AssetDirectoryPage />} />
+        <Route path="/assets/register" element={<AssetRegistrationForm />} />
+        <Route path="/assets/:id" element={<AssetDetailPage />} />
+        <Route path="/assets/:id/allocate" element={<AllocationTransferPage />} />
+
+        {/* Bookings (Member 3) */}
+        <Route path="/bookings" element={<ResourceBookingPage />} />
+
+        {/* Maintenance (Member 4) */}
+        <Route path="/maintenance" element={<MaintenanceKanbanPage />} />
+        <Route path="/audits" element={<AuditPage />} />
         <Route path="/reports" element={<ReportsPage />} />
         <Route path="/notifications" element={<NotificationsPage />} />
 
-        {/* Organization — Member 1 */}
+        {/* Organization (Member 1) */}
         <Route path="/org/departments" element={<DepartmentsPage />} />
         <Route path="/org/categories" element={<CategoriesPage />} />
         <Route path="/org/facilities" element={<FacilitiesPage />} />
