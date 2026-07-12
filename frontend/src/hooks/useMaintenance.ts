@@ -169,6 +169,23 @@ export interface NotificationFilters {
   isRead?: boolean;
 }
 
+export type ReportType =
+  | 'utilization-by-department'
+  | 'maintenance-frequency'
+  | 'most-used-assets'
+  | 'idle-assets'
+  | 'assets-due-for-maintenance'
+  | 'department-allocation-summary'
+  | 'booking-heatmap';
+
+export interface UtilizationByDepartmentRow { department: string; allocatedCount: number; percentage: number; }
+export interface MaintenanceFrequencyRow { assetTag: string; assetName: string; category: string; requestCount: number; lastRequestDate: string | null; }
+export interface MostUsedAssetRow { assetTag: string; assetName: string; bookingCount: number; totalHours: number; }
+export interface IdleAssetRow { assetTag: string; assetName: string; category: string; idleDays: number; }
+export interface AssetDueForMaintenanceRow { assetTag: string; assetName: string; reason: string; dueDate: string; }
+export interface DepartmentAllocationRow { department: string; categories: Array<{ name: string; count: number }>; totalAssets: number; }
+export interface BookingHeatmapCell { dayOfWeek: number; hour: number; count: number; }
+
 const auditKeys = {
   all: ['audits'] as const,
   detail: (id: string) => ['audits', id] as const,
@@ -182,6 +199,10 @@ const notificationKeys = {
 const maintenanceKeys = {
   all: ['maintenance'] as const,
   list: (filters: MaintenanceFilters) => ['maintenance', filters] as const,
+};
+
+const reportKeys = {
+  data: (reportType: ReportType) => ['reports', reportType] as const,
 };
 
 export function useMaintenanceRequests(filters: MaintenanceFilters = {}) {
@@ -204,6 +225,13 @@ export function useRecentActivity(limit = 10) {
     queryKey: ['dashboard', 'recent-activity', limit],
     queryFn: (): Promise<Activity[]> =>
       client.get('/dashboard/recent-activity', { params: { limit } }).then((response) => response.data.data),
+  });
+}
+
+export function useReportData<T>(reportType: ReportType) {
+  return useQuery({
+    queryKey: reportKeys.data(reportType),
+    queryFn: (): Promise<T> => client.get(`/reports/${reportType}`).then((response) => response.data.data),
   });
 }
 

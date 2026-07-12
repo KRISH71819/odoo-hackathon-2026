@@ -8,7 +8,8 @@ import {
   ToolOutlined,
 } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
-import { useDashboardOverview, useRecentActivity } from '../../hooks/useMaintenance';
+import { type BookingHeatmapCell, useDashboardOverview, useRecentActivity, useReportData } from '../../hooks/useMaintenance';
+import BookingHeatmap from './BookingHeatmap';
 
 const { Title, Text } = Typography;
 
@@ -20,6 +21,7 @@ export default function DashboardPage() {
   const navigate = useNavigate();
   const overview = useDashboardOverview();
   const activity = useRecentActivity(10);
+  const heatmap = useReportData<BookingHeatmapCell[]>('booking-heatmap');
   const data = overview.data;
 
   const cards = [
@@ -88,6 +90,10 @@ export default function DashboardPage() {
             )}
           />
         )}
+      </Card>
+
+      <Card title="Resource Booking Heatmap" style={{ marginTop: 16 }}>
+        <BookingHeatmap data={heatmap.data} loading={heatmap.isLoading} compact />
       </Card>
     </div>
   );
