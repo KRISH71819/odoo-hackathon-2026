@@ -64,10 +64,8 @@ export async function createMaintenanceRequest(data: CreateMaintenanceInput, req
       include: maintenanceInclude,
     });
 
-    await tx.asset.update({
-      where: { id: data.assetId },
-      data: { status: 'UNDER_MAINTENANCE' },
-    });
+    // Asset stays AVAILABLE until an Admin/Manager approves — P0 compliance
+    // The flip to UNDER_MAINTENANCE happens in updateStatus() on APPROVED.
 
     const reviewers = await tx.user.findMany({
       where: { role: { in: ['ADMIN', 'MANAGER'] } },
@@ -150,6 +148,14 @@ export async function updateStatus(
       },
       include: maintenanceInclude,
     });
+
+    // P0: asset flips to UNDER_MAINTENANCE only on approval (not on request creation)
+    if (data.status === 'APPROVED') {
+      await tx.asset.update({
+        where: { id: request.assetId },
+        data: { status: 'UNDER_MAINTENANCE' },
+      });
+    }
 
     if (data.status === 'TECHNICIAN_ASSIGNED' && data.assignedToId) {
       await tx.notification.create({

@@ -14,7 +14,9 @@ import {
   Form,
   Select,
   Input,
+  DatePicker,
   message,
+  Alert,
   Result,
   Popconfirm,
 } from 'antd';
@@ -25,6 +27,7 @@ import {
   UserAddOutlined,
   QrcodeOutlined,
   DeleteOutlined,
+  WarningFilled,
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import {
@@ -71,6 +74,7 @@ export default function AssetDetailPage() {
 
   const [allocateOpen, setAllocateOpen] = useState(false);
   const [transferOpen, setTransferOpen] = useState(false);
+  const [doubleAllocError, setDoubleAllocError] = useState<string | null>(null);
   const [allocateForm] = Form.useForm();
   const [transferForm] = Form.useForm();
 
@@ -84,7 +88,16 @@ export default function AssetDetailPage() {
       setAllocateOpen(false);
       allocateForm.resetFields();
     } catch (err: any) {
-      message.error(err?.response?.data?.error || 'Allocation failed');
+      const errMsg: string = err?.response?.data?.error || 'Allocation failed';
+      // P0: If double-allocation detected, show clear block message + Transfer CTA
+      if (errMsg.toLowerCase().includes('already allocated') || errMsg.toLowerCase().includes('transfer must be requested')) {
+        setAllocateOpen(false);
+        allocateForm.resetFields();
+        const holder = asset.currentAllocation?.allocatedTo?.name || 'another employee';
+        setDoubleAllocError(`This asset is currently held by ${holder}. You cannot allocate it again — submit a Transfer Request instead.`);
+      } else {
+        message.error(errMsg);
+      }
     }
   };
 
@@ -319,11 +332,15 @@ export default function AssetDetailPage() {
               options={(departments || []).map((d: any) => ({ label: d.name, value: d.id }))}
             />
           </Form.Item>
+          <Form.Item name="expectedReturnDate" label="Expected Return Date">
+            <DatePicker style={{ width: '100%' }} placeholder="When should the asset be returned?" />
+          </Form.Item>
           <Form.Item name="reason" label="Reason">
             <Input.TextArea rows={2} placeholder="Optional reason" />
           </Form.Item>
         </Form>
       </Modal>
+
 
       {/* ── Transfer Modal ── */}
       <Modal
@@ -351,7 +368,42 @@ export default function AssetDetailPage() {
           </Form.Item>
         </Form>
       </Modal>
+
+      {/* ── Double-Allocation Block Modal (P0) ── */}
+      <Modal
+        open={!!doubleAllocError}
+        onCancel={() => setDoubleAllocError(null)}
+        footer={[
+          <Button key="cancel" onClick={() => setDoubleAllocError(null)}>Cancel</Button>,
+          <Button
+            key="transfer"
+            type="primary"
+            icon={<SwapOutlined />}
+            onClick={() => { setDoubleAllocError(null); setTransferOpen(true); }}
+          >
+            Request Transfer Instead
+          </Button>,
+        ]}
+        title={
+          <Space>
+            <WarningFilled style={{ color: '#faad14', fontSize: 18 }} />
+            Double Allocation Blocked
+          </Space>
+        }
+      >
+        <Alert
+          type="warning"
+          showIcon
+          description={doubleAllocError}
+          style={{ marginBottom: 12 }}
+        />
+        <p style={{ margin: 0, color: 'rgba(255,255,255,0.65)' }}>
+          To move this asset to a different person, you must submit a <strong>Transfer Request</strong>.
+          Once approved by a Manager or Admin, the asset will be transferred automatically.
+        </p>
+      </Modal>
     </div>
   );
 }
+
 

@@ -18,6 +18,7 @@ export const allocateAssetSchema = z.object({
   allocatedToId: z.string().uuid('Invalid user ID'),
   departmentId: z.string().uuid('Invalid department ID').optional().nullable(),
   reason: z.string().optional().nullable(),
+  expectedReturnDate: z.coerce.date().optional().nullable(),
 });
 
 export const transferAssetSchema = z.object({
