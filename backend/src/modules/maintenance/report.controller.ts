@@ -2,28 +2,28 @@ import { Request, Response } from 'express';
 import * as reportService from './report.service';
 
 export async function getReport(req: Request, res: Response) {
-  const reportType = req.params.reportType;
-  if (!reportService.isReportType(reportType)) {
+  const reportType = req.params.reportType as string;
+  if (!reportService.isReportType(reportType as string)) {
     return res.status(400).json({ success: false, error: 'Unknown report type' });
   }
   try {
-    res.json({ success: true, data: await reportService.getReportData(reportType) });
+    res.json({ success: true, data: await reportService.getReportData(reportType as any) });
   } catch (error) {
     sendError(res, error);
   }
 }
 
 export async function exportReport(req: Request, res: Response) {
-  const reportType = req.params.reportType;
+  const reportType = req.params.reportType as string;
   const format = req.query.format;
-  if (!reportService.isReportType(reportType)) {
+  if (!reportService.isReportType(reportType as string)) {
     return res.status(400).json({ success: false, error: 'Unknown report type' });
   }
   if (format !== 'csv' && format !== 'json') {
     return res.status(400).json({ success: false, error: 'format must be csv or json' });
   }
   try {
-    const file = await reportService.exportReport(reportType, format);
+    const file = await reportService.exportReport(reportType as any, format);
     res.setHeader('Content-Type', file.contentType);
     res.setHeader('Content-Disposition', `attachment; filename="${file.filename}"`);
     res.send(file.content);
